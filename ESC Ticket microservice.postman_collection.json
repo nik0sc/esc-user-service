@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "de6c87e1-7f6f-4792-8bfd-3610e44607d9",
+		"name": "ESC Ticket microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Ticket",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7adca5ff-e8ed-4b2d-8a2f-103d5b0f1189",
+						"exec": [
+							"pm.environment.set(\"ticketId\", \"1\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/ticket/{{ticketId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"ticket",
+						"{{ticketId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Ticket with Attachment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7adca5ff-e8ed-4b2d-8a2f-103d5b0f1189",
+						"exec": [
+							"pm.environment.set(\"ticketId\", \"1\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"type": "text",
+						"value": "{{sessionToken}}"
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/ticket/{{ticketId}}/attachment",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"ticket",
+						"{{ticketId}}",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Ticket",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7adca5ff-e8ed-4b2d-8a2f-103d5b0f1189",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"Yet another pointless ticket\",\n\t\"message\": \"I am getting a widgetization error when I attempt to confound the heterozygote\",\n\t\"priority\": 4,\n\t\"severity\": 4\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/ticket",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"ticket"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6c1be67c-00cd-47ca-b3d6-d392c4cc770a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "5bd2801d-a036-4a09-bf31-943cb164af54",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "42c53e17-4b59-4121-9153-256622cd46a5",
+			"key": "baseUrl",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
