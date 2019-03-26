@@ -140,6 +140,34 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Get Ticket by User Token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/ticket/byUser",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"ticket",
+						"byUser"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -166,9 +194,9 @@
 	],
 	"variable": [
 		{
-			"id": "42c53e17-4b59-4121-9153-256622cd46a5",
+			"id": "615fbd9d-081f-410e-b5ec-6cb1bfa06285",
 			"key": "baseUrl",
-			"value": "",
+			"value": "https://esc-ticket-service.lepak.sg",
 			"type": "string"
 		}
 	]
