@@ -14,6 +14,13 @@ const knex = require('knex')({
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
+app.get('/version', (req, res) => {
+    res.json({
+        name: 'esc-ticket-service',
+        rev: process.env.GIT_REV
+    });
+})
+
 app.get('/chat/:chatroomId', (req, res) => {
     knex('chat_messages').select('users.username', 'chat_messages.message', 'chat_messages.sent_time')
         .join('users', 'chat_messages.sent_user_id', '=', 'users.id')
