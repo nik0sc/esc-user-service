@@ -3,7 +3,7 @@ const axios = require('axios');
 // Middleware function to check tokens against acnapi
 // If the token checks out, the session object is injected into request object
 // Use it to check if this user is authorized to access the object
-exports.check_session_token = function (req, res, next) {
+exports.checkSessionToken = function (req, res, next) {
     var session_token = req.header('X-Parse-Session-Token');
 
     if (typeof session_token === 'undefined') {
