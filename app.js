@@ -39,7 +39,23 @@ app.put('/ticket/:ticketId(\\d+)',
 
 app.put('/ticket/:ticketId/attachment',
         login.checkSessionToken, 
+        attachments.uploadToTicket);
+
+app.post('/attachment',
+        login.checkSessionToken,
         attachments.upload);
+
+app.put('/attachment/:attachmentId(\\d+)/linkToTicket/:ticketId(\\d+)',
+        login.checkSessionToken,
+        attachments.linkToTicket);
+
+app.delete('/attachment/:attachmentId(\\d+)',
+        login.checkSessionToken,
+        attachments.delete);
+
+app.delete('/attachment',
+        login.checkSessionToken,
+        attachments.delete);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);

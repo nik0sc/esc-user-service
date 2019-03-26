@@ -1,6 +1,18 @@
 const fs = require('fs');
 
 exports.upload = function (req, res) {
+
+};
+
+exports.linkToTicket = function (req, res) {
+
+};
+
+exports.delete = function (req, res) {
+
+};
+
+exports.uploadToTicket = function (req, res) {
     // Make sure this ticket exists
     var query = req.app.locals.knex('tickets')
         .first('id', 'attachment_path')
