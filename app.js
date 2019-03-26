@@ -17,7 +17,7 @@ app.locals.knex = require('knex')({
 // Allow XHR from anywhere
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Parse-Session-Token');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Parse-Session-Token, Content-Type');
     next();
 });
 
