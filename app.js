@@ -14,6 +14,13 @@ app.locals.knex = require('knex')({
     connection: process.env.DATABASE_URL
 });
 
+// Allow XHR from anywhere
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Parse-Session-Token');
+    next();
+});
+
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.get('/version', (req, res) => {
