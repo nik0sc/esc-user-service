@@ -40,8 +40,9 @@ app.get('/ticket/:ticketId(\\d+)', (req, res) => {
             'tickets.assigned_team', 'tickets.opener_user',
             'users.username', 'users.long_name', 
             'teams.team_name')
-        .join('users', 'tickets.opener_user', '=', 'users.id')
-        .join('teams', 'tickets.assigned_team', '=', 'teams.id')
+        // Want my ticket even if these columns are null
+        .leftJoin('users', 'tickets.opener_user', '=', 'users.id')
+        .leftJoin('teams', 'tickets.assigned_team', '=', 'teams.id')
         .where('tickets.id', req.params.ticketId);
     
     console.log(query.toString());
