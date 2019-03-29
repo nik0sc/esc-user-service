@@ -3,9 +3,9 @@ const app = express();
 const port = 5000;
 const bodyparser = require('body-parser');
 
-const tickets = require('./routes/tickets');
-const attachments = require('./routes/attachments');
-const login = require('./login');
+const tickets = require('./handlers/tickets');
+const attachments = require('./handlers/attachments');
+const login = require('./middleware/login');
 
 app.use(bodyparser.json());
 
@@ -17,20 +17,25 @@ app.locals.knex = require('knex')({
 // Allow XHR from anywhere
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Parse-Session-Token, Content-Type');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Parse-Session-Token, X-Requested-With, Content-Type');
     next();
 });
 
-app.get('/', (req, res) => res.send('Hello World!'));
+function info(req, res) {
+    var git_rev = (typeof process.env.GIT_REV === 'undefined') 
+            ? 'Not deployed'
+            : process.env.GIT_REV;
 
-app.get('/version', (req, res) => {
     res.json({
         name: 'esc-ticket-service',
-        rev: process.env.GIT_REV
+        rev: git_rev
     });
-})
+}
+app.get('/', info);
+app.get('/version', info);
 
-app.get('/ticket/:ticketId(\\d+)', tickets.getById);
+app.get('/ticket/:ticketId(\\d+)',
+        tickets.getById);
 
 app.get('/ticket/byUser', 
         login.checkSessionToken, 
@@ -47,6 +52,10 @@ app.put('/ticket/:ticketId(\\d+)',
 app.put('/ticket/:ticketId/attachment',
         login.checkSessionToken, 
         attachments.uploadToTicket);
+
+app.get('/attachment/:attachmentId',
+        login.checkSessionToken,
+        attachments.get);
 
 app.post('/attachment',
         login.checkSessionToken,

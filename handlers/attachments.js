@@ -1,5 +1,9 @@
 const fs = require('fs');
 
+exports.get = function (req, res) {
+
+};
+
 exports.upload = function (req, res) {
 
 };
