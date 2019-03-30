@@ -5,6 +5,7 @@ const bodyparser = require('body-parser');
 
 const tickets = require('./handlers/tickets');
 const attachments = require('./handlers/attachments');
+const users = require('./handlers/users');
 const login = require('./middleware/login');
 
 app.use(bodyparser.json());
@@ -72,6 +73,9 @@ app.delete('/attachment/:attachmentId(\\d+)',
 app.delete('/attachment',
         login.checkSessionToken,
         attachments.delete);
+
+app.post('/user',
+        users.createUser);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);
