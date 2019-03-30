@@ -168,6 +168,55 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Get Version",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/version",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"version"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"some_user\",\n\t\"password\": \"Password1!\",\n\t\"long_name\": \"Some User\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -194,7 +243,7 @@
 	],
 	"variable": [
 		{
-			"id": "615fbd9d-081f-410e-b5ec-6cb1bfa06285",
+			"id": "a7fbbab2-f17b-44ac-8301-2f9a18b3f23f",
 			"key": "baseUrl",
 			"value": "https://esc-ticket-service.lepak.sg",
 			"type": "string"
