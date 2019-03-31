@@ -85,8 +85,19 @@ app.delete('/attachment',
         login.checkSessionToken,
         attachments.delete);
 
+app.get('/user/login',
+        users.login);
+
 app.post('/user',
         users.createUser);
+
+app.get('/user/me',
+        login.checkSessionToken,
+        users.getCurrentUser);
+
+app.delete('/user/me',
+        login.checkSessionToken,
+        users.deleteUser);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);

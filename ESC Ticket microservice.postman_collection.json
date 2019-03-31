@@ -218,6 +218,72 @@
 				"description": "Creating an existing user will fail!"
 			},
 			"response": []
+		},
+		{
+			"name": "Login",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"dummy_user\",\n\t\"password\": \"Password1!\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Current User",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/me",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"me"
+					]
+				},
+				"description": "Use the current session token to retrieve the current user profile."
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -244,7 +310,7 @@
 	],
 	"variable": [
 		{
-			"id": "ab95a76e-6211-40f3-a176-7c9908bff7e6",
+			"id": "e3b4dbe7-6799-4205-a5af-ea24ae1f68a1",
 			"key": "baseUrl",
 			"value": "https://esc-ticket-service.lepak.sg",
 			"type": "string"
