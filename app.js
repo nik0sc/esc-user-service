@@ -15,6 +15,17 @@ app.locals.knex = require('knex')({
     connection: process.env.DATABASE_URL
 });
 
+const axios = require('axios');
+
+app.locals.acn_axios = axios.create({
+    baseURL: 'https://ug-api.acnapiv3.io/swivel/acnapi-common-services/common',
+    timeout: 3000,
+    headers: {
+        'Server-Token': process.env.ACN_SERVER_TOKEN,
+        'Content-Type': 'application/json'  
+    }
+});
+
 // Allow XHR from anywhere
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');

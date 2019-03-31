@@ -1,8 +1,7 @@
-const axios = require('axios');
-
 exports.createUser = function (req, res) {
     console.log('Create new user');
     const knex = req.app.locals.knex;
+    const acn_axios = req.app.locals.acn_axios;
 
     let t_username = req.body.username;
     let t_password = req.body.password;
@@ -10,16 +9,9 @@ exports.createUser = function (req, res) {
     // console.log(t_username + ':' + t_password);
 
     // Attempt to insert into acn api first
-    axios.post('https://ug-api.acnapiv3.io/swivel/acnapi-common-services/common/users', {
-        headers: {
-            'Server-Token': process.env.ACN_SERVER_TOKEN,
-            'Content-Type': 'application/json'    
-        },
-        data: {
-            username: t_username,
-            password: t_password
-        },
-        timeout: 3000
+    acn_axios.post('/users', {
+        username: t_username,
+        password: t_password
     }).then((res2) => {
         // Now insert into db
         let query = knex('users').insert({
@@ -36,12 +28,14 @@ exports.createUser = function (req, res) {
             // Success
             // Return the token
             res.json({
-                user_id: id,
+                user_id: (typeof id === 'object' && id.length === 1)
+                        ? id[0] : id,
                 username: req.body.username,
-                acn_id: res.data.objectId,
+                acn_id: res2.data.objectId,
                 session_token: res2.data.sessionToken
             });
         }).catch((err) => {
+            console.log(err);
             res.status(500).json({
                 error: 'Db insert failed'
             });

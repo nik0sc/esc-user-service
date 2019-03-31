@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 // Middleware function to check tokens against acnapi
 // If the token checks out, the session object is injected into request object
 // Use it to check if this user is authorized to access the object
@@ -13,10 +11,10 @@ exports.checkSessionToken = function (req, res, next) {
         return;
     }
 
-    axios.get('https://ug-api.acnapiv3.io/swivel/acnapi-common-services/common/sessions/me', {
+    const acn_axios = req.app.locals.acn_axios;
+
+    acn_axios.get('/sessions/me', {
         headers: {
-            'Server-Token': process.env.ACN_SERVER_TOKEN,
-            'Content-Type': 'application/json',
             'X-Parse-Session-Token': session_token
         },
         timeout: 3000 // 3sec
