@@ -204,7 +204,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"username\": \"some_user\",\n\t\"password\": \"Password1!\",\n\t\"long_name\": \"Some User\"\n}"
+					"raw": "{\n\t\"username\": \"dummy_user\",\n\t\"password\": \"Password1!\",\n\t\"long_name\": \"Dummy User\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/user",
@@ -214,7 +214,8 @@
 					"path": [
 						"user"
 					]
-				}
+				},
+				"description": "Creating an existing user will fail!"
 			},
 			"response": []
 		}
@@ -243,7 +244,7 @@
 	],
 	"variable": [
 		{
-			"id": "a7fbbab2-f17b-44ac-8301-2f9a18b3f23f",
+			"id": "ab95a76e-6211-40f3-a176-7c9908bff7e6",
 			"key": "baseUrl",
 			"value": "https://esc-ticket-service.lepak.sg",
 			"type": "string"
