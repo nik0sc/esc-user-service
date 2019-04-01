@@ -59,5 +59,6 @@ exports.checkSessionToken = async function (req, res, next) {
                 error_code: err.code 
             });
         }
+        return;
     }
 };

@@ -23,12 +23,14 @@ exports.getById = async function (req, res) {
         res.status(500).json({
             error: 'Db error'
         });
+        return;
     }
 
     if (typeof row === 'undefined') {
         res.status(404).json({
             error: 'Ticket not found'
         });
+        return;
     }
     
     res.json(row);
@@ -67,6 +69,7 @@ exports.getAllByUser = async function (req, res) {
         res.status(500).json({
             error: 'Db error'
         });
+        return;
     }
 };
 
@@ -98,6 +101,7 @@ exports.createNew = async function (req, res) {
             error: 'Database error while inserting ticket',
             ex: err.toString()
         });
+        return;
     }
     
     res.json({

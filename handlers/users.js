@@ -11,6 +11,7 @@ exports.login = async function (req, res) {
         res.status(400).json({
             error: 'No username or password'
         });
+        return;
     }
 
     let res2;
@@ -55,6 +56,7 @@ exports.login = async function (req, res) {
                 error_code: err.code 
             });
         }
+        return;
     }
 
     let query = knex('users')
@@ -71,6 +73,7 @@ exports.login = async function (req, res) {
         res.status(500).json({
             error: 'Db error'
         });
+        return;
     }
 
     row.sessionToken = res2.data.sessionToken;
@@ -117,14 +120,18 @@ exports.createUser = async function (req, res) {
                 response: status_string
             });
         }
+        return;
     }
+
+    let t_acn_id = res2.data.objectId;
+    let t_session_token = res2.data.sessionToken;
 
     // Now insert into db
     let query = knex('users').insert({
         username: req.body.username,
         long_name: req.body.long_name,
-        acn_id: res2.data.objectId,
-        acn_session_token: res2.data.sessionToken,
+        acn_id: t_acn_id,
+        acn_session_token: t_session_token,
         user_type: 0 // Meaning what?
     });
     console.log(query.toString());
@@ -132,11 +139,13 @@ exports.createUser = async function (req, res) {
     let id;
     try {
         id = await query; 
-    } catch {
+    } catch (err) {
         console.error(err);
+
         res.status(500).json({
             error: 'Db insert failed'
         });
+        return;
     }
     
     // Success
@@ -145,8 +154,8 @@ exports.createUser = async function (req, res) {
         user_id: (typeof id === 'object' && id.length === 1)
                 ? id[0] : id,
         username: req.body.username,
-        acn_id: res2.data.objectId,
-        session_token: res2.data.sessionToken
+        acn_id: t_acn_id,
+        session_token: t_session_token
     });
 };
 
@@ -172,6 +181,7 @@ exports.getCurrentUser = async function (req, res) {
         res.status(500).json({
             error: 'Db error'
         });
+        return;
     }
     
     row.acn_extra = req.acn_session;
