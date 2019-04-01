@@ -141,10 +141,34 @@ exports.createUser = async function (req, res) {
         id = await query; 
     } catch (err) {
         console.error(err);
+        // Roll back acn user database!
+        try {
+            await acn_axios.delete('/users/' + t_acn_id, {
+                headers: {
+                    'X-Parse-Session-Token': t_session_token
+                }
+            });
+        } catch (rollback_err) {
+            console.error('Acn database rollback failed! Inconsistent with id='
+                    + t_acn_id + ' token=' + t_session_token);
+            console.error(rollback_err);
+            res.status(500).json({
+                error: 'Db insert failed and acn rollback failed'
+            });
+            return;
+        }
 
-        res.status(500).json({
-            error: 'Db insert failed'
-        });
+        if (err.code === 'ER_DUP_ENTRY') {
+            console.error(`User "${req.body.username}" already exists ` + 
+                    `in mysql but not acn user database???`);
+            res.status(400).json({
+                error: 'This user already exists in the database'
+            });
+        } else {
+            res.status(500).json({
+                error: 'Db insert failed'
+            });
+        }
         return;
     }
     
