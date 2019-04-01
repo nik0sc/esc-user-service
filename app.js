@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 });
 
 function info(req, res) {
-    var git_rev = (typeof process.env.GIT_REV === 'undefined') 
+    let git_rev = (typeof process.env.GIT_REV === 'undefined') 
             ? 'Not deployed'
             : process.env.GIT_REV;
 

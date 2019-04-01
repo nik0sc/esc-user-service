@@ -18,7 +18,7 @@ exports.delete = function (req, res) {
 
 exports.uploadToTicket = function (req, res) {
     // Make sure this ticket exists
-    var query = req.app.locals.knex('tickets')
+    let query = req.app.locals.knex('tickets')
         .first('id', 'attachment_path')
         .where('id', req.params.ticketId);
     

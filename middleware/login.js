@@ -38,7 +38,7 @@ exports.checkSessionToken = async function (req, res, next) {
                 });
             } else {
                 console.log('error in session verification');
-                var status_string = err.response.status + ' ' + 
+                let status_string = err.response.status + ' ' + 
                         err.response.statusText;
                 console.log(status_string);
                 res.status(500).json({
