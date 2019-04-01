@@ -1,8 +1,8 @@
 // Middleware function to check tokens against acnapi
 // If the token checks out, the session object is injected into request object
 // Use it to check if this user is authorized to access the object
-exports.checkSessionToken = function (req, res, next) {
-    var session_token = req.header('X-Parse-Session-Token');
+exports.checkSessionToken = async function (req, res, next) {
+    let session_token = req.header('X-Parse-Session-Token');
 
     if (typeof session_token === 'undefined') {
         res.status(401).json({
@@ -13,17 +13,18 @@ exports.checkSessionToken = function (req, res, next) {
 
     const acn_axios = req.app.locals.acn_axios;
 
-    acn_axios.get('/sessions/me', {
-        headers: {
-            'X-Parse-Session-Token': session_token
-        },
-        timeout: 3000 // 3sec
-    }).then((res2) => {
+    try {
+        let res2 = await acn_axios.get('/sessions/me', {
+            headers: {
+                'X-Parse-Session-Token': session_token
+            }
+        });
+
         req.acn_session = res2.data;
         if (typeof next === 'function') {
             next();
         }
-    }).catch((err) => {
+    } catch (err) {
         if (err.response) {
             // Invalid session token
             if (err.response.status === 400 && err.response.data.code === 209) {
@@ -58,5 +59,5 @@ exports.checkSessionToken = function (req, res, next) {
                 error_code: err.code 
             });
         }
-    });
+    }
 };
