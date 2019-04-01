@@ -1,4 +1,4 @@
-exports.login = function (req, res) {
+exports.login = async function (req, res) {
     console.log('Logging in');
     const knex = req.app.locals.knex;
     const acn_axios = req.app.locals.acn_axios;
@@ -6,34 +6,22 @@ exports.login = function (req, res) {
     let t_username = req.body.username;
     let t_password = req.body.password;
 
-    acn_axios.get('/login', {
-        params: {
-            username: t_username,
-            password: t_password
-        }
-    })
-    .then((res2) => {
-        let query = knex('users')
-        .first('users.id', 'users.username', 'users.long_name', 'users.acn_id',
-        'users.user_type')
-        .where('users.acn_id', res2.data.objectId);
-    
-        console.log(query.toString());
-
-        query.then((row) => {
-            row.sessionToken = res2.data.sessionToken;
-            delete res2.data.sessionToken;
-            row.acn_extra = res2.data;
-            
-            res.json(row);
-        })
-        .catch((err) => {
-            res.status(500).json({
-                error: 'Db error'
-            });
+    if (typeof t_username === 'undefined' 
+            || typeof t_password === 'undefined') {
+        res.status(400).json({
+            error: 'No username or password'
         });
-    })
-    .catch((err) => {
+    }
+
+    let res2;
+    try {
+        res2 = await acn_axios.get('/login', {
+            params: {
+                username: t_username,
+                password: t_password
+            }
+        });
+    } catch (err) {
         if (err.response) {
             if (err.response.status === 404 && err.response.data.code === 101) {
                 res.status(401).json({
@@ -46,7 +34,7 @@ exports.login = function (req, res) {
                 });
             } else {
                 console.log('error in login');
-                var status_string = err.response.status + ' ' + 
+                let status_string = err.response.status + ' ' + 
                         err.response.statusText;
                 console.log(status_string);
                 res.status(500).json({
@@ -67,11 +55,32 @@ exports.login = function (req, res) {
                 error_code: err.code 
             });
         }
-    });
+    }
 
+    let query = knex('users')
+    .first('users.id', 'users.username', 'users.long_name', 'users.acn_id',
+    'users.user_type')
+    .where('users.acn_id', res2.data.objectId);
+
+    console.log(query.toString());
+
+    let row;
+    try {
+        row = await query;
+    } catch (err) {
+        res.status(500).json({
+            error: 'Db error'
+        });
+    }
+
+    row.sessionToken = res2.data.sessionToken;
+    delete res2.data.sessionToken;
+    row.acn_extra = res2.data;
+    
+    res.json(row);
 };
 
-exports.createUser = function (req, res) {
+exports.createUser = async function (req, res) {
     console.log('Create new user');
     const knex = req.app.locals.knex;
     const acn_axios = req.app.locals.acn_axios;
@@ -79,41 +88,14 @@ exports.createUser = function (req, res) {
     let t_username = req.body.username;
     let t_password = req.body.password;
 
-    // console.log(t_username + ':' + t_password);
-
+    let res2;
     // Attempt to insert into acn api first
-    acn_axios.post('/users', {
-        username: t_username,
-        password: t_password
-    }).then((res2) => {
-        // Now insert into db
-        let query = knex('users').insert({
-            username: req.body.username,
-            long_name: req.body.long_name,
-            acn_id: res2.data.objectId,
-            acn_session_token: res2.data.sessionToken,
-            user_type: 0 // Meaning what?
+    try {
+        res2 = await acn_axios.post('/users', {
+            username: t_username,
+            password: t_password
         });
-    
-        console.log(query.toString());
-    
-        query.then((id) => {
-            // Success
-            // Return the token
-            res.json({
-                user_id: (typeof id === 'object' && id.length === 1)
-                        ? id[0] : id,
-                username: req.body.username,
-                acn_id: res2.data.objectId,
-                session_token: res2.data.sessionToken
-            });
-        }).catch((err) => {
-            console.log(err);
-            res.status(500).json({
-                error: 'Db insert failed'
-            });
-        });
-    }).catch((err) => {
+    } catch (err) {
         if (err.response.status === 504) {
             console.log('acn timeout');
             res.status(504).json({
@@ -127,7 +109,7 @@ exports.createUser = function (req, res) {
         } else {
             console.log('error in user creation');
             console.log(err.response.data);
-            var status_string = err.response.status + ' ' + 
+            let status_string = err.response.status + ' ' + 
                     err.response.statusText;
             console.log(status_string);
             res.status(500).json({
@@ -135,11 +117,40 @@ exports.createUser = function (req, res) {
                 response: status_string
             });
         }
-    });
+    }
 
+    // Now insert into db
+    let query = knex('users').insert({
+        username: req.body.username,
+        long_name: req.body.long_name,
+        acn_id: res2.data.objectId,
+        acn_session_token: res2.data.sessionToken,
+        user_type: 0 // Meaning what?
+    });
+    console.log(query.toString());
+
+    let id;
+    try {
+        id = await query; 
+    } catch {
+        console.error(err);
+        res.status(500).json({
+            error: 'Db insert failed'
+        });
+    }
+    
+    // Success
+    // Return the token
+    res.json({
+        user_id: (typeof id === 'object' && id.length === 1)
+                ? id[0] : id,
+        username: req.body.username,
+        acn_id: res2.data.objectId,
+        session_token: res2.data.sessionToken
+    });
 };
 
-exports.getCurrentUser = function (req, res) {
+exports.getCurrentUser = async function (req, res) {
     console.log('Get current user');
     let user_object_id = req.acn_session.user.objectId;
     const knex = req.app.locals.knex;
@@ -153,18 +164,27 @@ exports.getCurrentUser = function (req, res) {
 
     console.log(query.toString());
 
-    query.then((row) => {
-        row.acn_extra = req.acn_session;
-        res.json(row);
-    })
-    .catch((err) => {
-        console.log(err);
+    let row;
+    try {
+        row = await query;
+    } catch (err) {
+        console.error(err);
         res.status(500).json({
             error: 'Db error'
         });
-    });
+    }
+    
+    row.acn_extra = req.acn_session;
+    res.json(row);
 };
 
-exports.deleteUser = function (req, res) {
+exports.deleteUser = async function (req, res) {
+    // Attempt db delete (may or may not fail due to constraints)
+    console.log('Deleting current user');
+    let user_object_id = req.acn_session.user.objectId;
+    const knex = req.app.locals.knex;
+    const acn_axios = req.app.locals.acn_axios;
 
-};
+    // Roll back if acn delete fails
+    knex.transaction()    
+}

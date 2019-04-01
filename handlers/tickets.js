@@ -1,7 +1,7 @@
 // GET /ticket/:ticketId(\\d+)
-exports.getById = function (req, res) {
+exports.getById = async function (req, res) {
     console.log('Getting ' + req.params.ticketId);
-    var query = req.app.locals.knex('tickets')
+    let query = req.app.locals.knex('tickets')
         .first('tickets.id', 'tickets.title', 'tickets.message',
             'tickets.open_time', 
             'tickets.close_time', 'tickets.priority', 'tickets.severity',
@@ -12,15 +12,29 @@ exports.getById = function (req, res) {
         .leftJoin('users', 'tickets.opener_user', '=', 'users.id')
         .leftJoin('teams', 'tickets.assigned_team', '=', 'teams.id')
         .where('tickets.id', req.params.ticketId);
-    
+
     console.log(query.toString());
+
+    let row;
+    try {
+        row = await query;
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            error: 'Db error'
+        });
+    }
+
+    if (typeof row === 'undefined') {
+        res.status(404).json({
+            error: 'Ticket not found'
+        });
+    }
     
-    query.then((row) => {
-        res.json(row);
-    });
+    res.json(row);
 };
 
-exports.getAllByUser = function (req, res) {
+exports.getAllByUser = async function (req, res) {
     // Grab the user profile
     let user_object_id = req.acn_session.user.objectId;
     const knex = req.app.locals.knex;
@@ -46,17 +60,17 @@ exports.getAllByUser = function (req, res) {
 
     console.log(query.toString());
 
-    query.then((rows) => {
-        res.json(rows);
-    })
-    .catch((err) => {
+    try {
+        res.json(await query);
+    } catch (err) {
+        console.error(err);
         res.status(500).json({
             error: 'Db error'
         });
-    });
+    }
 };
 
-exports.createNew = function (req, res) {
+exports.createNew = async function (req, res) {
     console.log('Creating new ticket');
 
     let user_object_id = req.acn_session.user.objectId;
@@ -75,19 +89,21 @@ exports.createNew = function (req, res) {
 
     console.log(query.toString());
     
-    query.then((id) => {
-        res.json({
-            success: 'true',
-            id: (typeof id === 'object' && id.length === 1) ? id[0] : id
-        });
-    })
-    .catch((err) => {
+    let id;
+    try {
+        id = await query;
+    } catch (err) {
+        console.error(err);
         res.status(500).json({
             error: 'Database error while inserting ticket',
             ex: err.toString()
         });
+    }
+    
+    res.json({
+        success: true,
+        id: (typeof id === 'object' && id.length === 1) ? id[0] : id
     });
-
 };
 
 // PUT /ticket/:ticketId(\\d+)
