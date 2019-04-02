@@ -89,7 +89,12 @@ exports.createUser = async function (req, res) {
     const acn_axios = req.app.locals.acn_axios;
 
     let t_username = req.body.username;
-    let t_password = req.body.password;
+    if (typeof t_username === 'undefined') {
+        res.status(400).json({
+            error: 'No username provided'
+        });
+        return;
+    }
 
     // Validate username: Must comprise alnum or _, but not entirely digits 
     if (t_username.match(/^\d+$/)) {
@@ -102,6 +107,42 @@ exports.createUser = async function (req, res) {
     if (t_username.match(/^[^a-zA-Z0-9_]$/)) {
         res.status(400).json({
             error: 'Username contains non-alnum or non-underscore characters'
+        });
+        return;
+    }
+
+    let t_password = req.body.password;
+    if (typeof t_password === 'undefined' || t_password === '') {
+        res.status(400).json({
+            error: 'No password provided'
+        });
+        return;
+    }
+
+    let t_long_name = (typeof req.body.long_name !== 'undefined') 
+            ? req.body.long_name : '';
+
+    // Get in, get out
+    let test_query = knex('users')
+    .count('username as user_count')
+    .where('username', t_username);
+
+    console.log(test_query.toString());
+
+    let existing_rows;
+    try {
+        existing_rows = (await test_query)[0].user_count;
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            error: 'Db error'
+        });
+        return;
+    }
+
+    if (existing_rows !== 0) {
+        res.status(400).json({
+            error: 'User with this username already exists'
         });
         return;
     }
@@ -121,8 +162,9 @@ exports.createUser = async function (req, res) {
             });
         } else if (err.response.status === 400 &&
                 err.response.data.code === 202) {
+            console.error(`Username ${t_username} exists in acn but not in mysql`);
             res.status(400).json({
-                error: 'User already exists'
+                error: 'User with this username already exists'
             });
         } else {
             console.log('error in user creation');
@@ -143,11 +185,11 @@ exports.createUser = async function (req, res) {
 
     // Now insert into db
     let query = knex('users').insert({
-        username: req.body.username,
-        long_name: req.body.long_name,
+        username: t_username,
+        long_name: t_long_name,
         acn_id: t_acn_id,
         acn_session_token: t_session_token,
-        user_type: 0 // Meaning what?
+        user_type: 1 // Normal user by default
     });
     console.log(query.toString());
 
@@ -158,14 +200,14 @@ exports.createUser = async function (req, res) {
         console.error(err);
         // Roll back acn user database!
         try {
-            await acn_axios.delete('/users/' + t_acn_id, {
+            await acn_axios.delete(`/users/${t_acn_id}`, {
                 headers: {
                     'X-Parse-Session-Token': t_session_token
                 }
             });
         } catch (rollback_err) {
-            console.error('Acn database rollback failed! Inconsistent with id='
-                    + t_acn_id + ' token=' + t_session_token);
+            console.error(`Acn database rollback failed! Inconsistent with ` +
+                    `id=${t_acn_id} token=${t_session_token}`);
             console.error(rollback_err);
             res.status(500).json({
                 error: 'Db insert failed and acn rollback failed'
@@ -174,7 +216,7 @@ exports.createUser = async function (req, res) {
         }
 
         if (err.code === 'ER_DUP_ENTRY') {
-            console.error(`User "${req.body.username}" already exists ` + 
+            console.error(`User "${t_username}" already exists ` + 
                     `in mysql but not acn user database???`);
             res.status(400).json({
                 error: 'This user already exists in the database'
@@ -192,7 +234,7 @@ exports.createUser = async function (req, res) {
     res.json({
         user_id: (typeof id === 'object' && id.length === 1)
                 ? id[0] : id,
-        username: req.body.username,
+        username: t_username,
         acn_id: t_acn_id,
         session_token: t_session_token
     });
