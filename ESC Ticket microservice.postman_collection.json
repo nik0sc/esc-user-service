@@ -165,7 +165,8 @@
 						"ticket",
 						"byUser"
 					]
-				}
+				},
+				"description": "List all tickets opened by the current user."
 			},
 			"response": []
 		},
@@ -186,7 +187,8 @@
 					"path": [
 						"version"
 					]
-				}
+				},
+				"description": "Get the git commit hash for the current deployment of the service."
 			},
 			"response": []
 		},
@@ -284,6 +286,53 @@
 				"description": "Use the current session token to retrieve the current user profile."
 			},
 			"response": []
+		},
+		{
+			"name": "Promote User to Admin",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0739daad-27d8-47f6-bd7c-ad30749033c1",
+						"exec": [
+							"pm.environment.set(\"userIdent\", \"nikos\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/{{userIdent}}/promoteToAdmin",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{userIdent}}",
+						"promoteToAdmin"
+					]
+				},
+				"description": "User holding the session token must be an admin. In other words, only an admin can promote other users to admin status.\nThe promotion is idempotent. userIdent can be either an all-digit string, in which case the ident is treated as an user id, or a mixed alnum/underscore string, in which case the ident is treated as a username."
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -310,7 +359,7 @@
 	],
 	"variable": [
 		{
-			"id": "e3b4dbe7-6799-4205-a5af-ea24ae1f68a1",
+			"id": "d27780d1-04e2-462c-a2d6-014e5a40f34b",
 			"key": "baseUrl",
 			"value": "https://esc-ticket-service.lepak.sg",
 			"type": "string"
