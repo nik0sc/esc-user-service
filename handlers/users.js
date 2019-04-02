@@ -91,6 +91,21 @@ exports.createUser = async function (req, res) {
     let t_username = req.body.username;
     let t_password = req.body.password;
 
+    // Validate username: Must comprise alnum or _, but not entirely digits 
+    if (t_username.match(/^\d+$/)) {
+        res.status(400).json({
+            error: 'Username cannot be made up of all digits'
+        });
+        return;
+    }
+
+    if (t_username.match(/^[^a-zA-Z0-9_]$/)) {
+        res.status(400).json({
+            error: 'Username contains non-alnum or non-underscore characters'
+        });
+        return;
+    }
+
     let res2;
     // Attempt to insert into acn api first
     try {
@@ -183,6 +198,61 @@ exports.createUser = async function (req, res) {
     });
 };
 
+exports.promoteUserToAdmin = async function (req, res) {
+    console.log('Promote to admin');
+
+    let t_user_ident = req.params.userIdent;
+    const knex = req.app.locals.knex;
+    let ret_object = {userIdent: t_user_ident};
+
+    let query = knex('users')
+    .update('user_type', 2)
+    .limit(1);
+
+    if (t_user_ident.match(/^\d+$/)) {
+        // User id
+        query = query.where('id', t_user_ident);
+        ret_object.match = 'id';
+    } else if (t_user_ident.match(/^[a-zA-Z0-9_]+$/)) {
+        // Username
+        query = query.where('username', t_user_ident);
+        ret_object.match = 'username';
+    } else {
+        res.status(400).json({
+            error: 'Malformed user ident'
+        });
+        return;
+    }
+
+    console.log(query.toString());
+
+    let rows_updated;
+    try {
+        rows_updated = await query;
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            error: 'Database error while updating user',
+            ex: err.toString()
+        });
+        return;
+    }
+    
+    if (rows_updated === 0) {
+        res.status(404).json({
+            error: 'User not found'
+        });
+    } else if (rows_updated === 1) {
+        res.json(ret_object);
+    } else {
+        res.status(500).json({
+            error: 'Unexpected rows_updated value',
+            rows_updated: rows_updated,
+            typeof: typeof rows_updated
+        });
+    }
+};
+
 exports.getCurrentUser = async function (req, res) {
     console.log('Get current user');
     let user_object_id = req.acn_session.user.objectId;
@@ -220,5 +290,5 @@ exports.deleteUser = async function (req, res) {
     const acn_axios = req.app.locals.acn_axios;
 
     // Roll back if acn delete fails
-    knex.transaction()    
+    knex.transaction()
 }
