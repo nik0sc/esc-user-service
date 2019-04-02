@@ -91,6 +91,11 @@ app.get('/user/login',
 app.post('/user',
         users.createUser);
 
+app.put('/user/:userIdent/promoteToAdmin',
+        login.checkSessionToken,
+        login.userIsAdmin,
+        users.promoteUserToAdmin);
+
 app.get('/user/me',
         login.checkSessionToken,
         users.getCurrentUser);
