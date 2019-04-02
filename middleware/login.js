@@ -21,9 +21,6 @@ exports.checkSessionToken = async function (req, res, next) {
         });
 
         req.acn_session = res2.data;
-        if (typeof next === 'function') {
-            next();
-        }
     } catch (err) {
         if (err.response) {
             // Invalid session token
@@ -61,4 +58,47 @@ exports.checkSessionToken = async function (req, res, next) {
         }
         return;
     }
+    
+    if (typeof next === 'function') {
+        next();
+    }
 };
+
+exports.userIsAdmin = async function (req, res, next) {
+    if (typeof req.acn_session === 'undefined') {
+        throw new Error('No acn user management object found in req');
+    }
+
+    let user_object_id = req.acn_session.user.objectId;
+    const knex = req.app.locals.knex;
+    
+    let query = knex('users')
+    .first('users.id', 'users.username', 'users.acn_id', 'users.user_type')
+    .where('users.acn_id', user_object_id);
+
+    console.log(query.toString());
+
+    let row;
+    try {
+        row = await query;
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            error: 'Db error'
+        });
+        return;
+    }
+    
+    console.log(`${row.id}:${row.username}:${row.user_type}`);
+
+    if (row.user_type !== 2) {
+        res.status(403).json({
+            error: 'Only an admin can perform this action'
+        });
+        return;
+    } 
+
+    if (typeof next === 'function') {
+        next();
+    }
+}
