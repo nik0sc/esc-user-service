@@ -102,7 +102,7 @@ app.get('/user/me',
 
 app.delete('/user/me',
         login.checkSessionToken,
-        users.deleteUser);
+        users.deleteCurrentUser);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);

@@ -1,3 +1,35 @@
+/**
+ * Login user
+ * 
+ * In: JSON
+ * {
+ *  "username": <String>,
+ *  "password": <String>
+ * }
+ * 
+ * Out:
+ *  Success: JSON 
+ * {
+ *  "id": <Number>,
+ *  "username": <String>,
+ *  "long_name": <String>,
+ *  "acn_id": <String>,
+ *  "user_type": <Number>,
+ *  "session_token": <String>,
+ *  "acn_extra": <Object>
+ * }
+ *  Failure: JSON; status != 200
+ * {
+ *  "error": <String>
+ * }
+ * 
+ * Preconditions:
+ * - Username and password are provided and not empty
+ * 
+ * Postconditions:
+ * - Existing tokens for this user are still valid
+ * - Idempotent
+ */
 exports.login = async function (req, res) {
     console.log('Logging in');
     const knex = req.app.locals.knex;
@@ -6,8 +38,10 @@ exports.login = async function (req, res) {
     let t_username = req.body.username;
     let t_password = req.body.password;
 
-    if (typeof t_username === 'undefined' 
-            || typeof t_password === 'undefined') {
+    if (typeof t_username === 'undefined'
+            || t_username === '' 
+            || typeof t_password === 'undefined'
+            || t_password === '') {
         res.status(400).json({
             error: 'No username or password'
         });
@@ -76,13 +110,48 @@ exports.login = async function (req, res) {
         return;
     }
 
-    row.sessionToken = res2.data.sessionToken;
+    row.session_token = res2.data.sessionToken;
     delete res2.data.sessionToken;
     row.acn_extra = res2.data;
     
     res.json(row);
 };
 
+/**
+ * Create a new user
+ * 
+ * In: JSON
+ * {
+ *  "username": <String>,
+ *  "password": <String>,
+ *  "long_name": <String>
+ * }
+ * 
+ * Out:
+ *  Success: JSON
+ * {
+ *  "user_id": <Integer>,
+ *  "username": <String>,
+ *  "acn_id": <String>,
+ *  "session_token": <String>
+ * }
+ *  Failure: JSON; status != 200
+ * {
+ *  "error": <String>
+ * }
+ * 
+ * Preconditions:
+ * - Username and password are provided and not empty
+ * - User with this username does not already exist in either mysql or acn
+ * - Username contains only alnum and underscore characters
+ * - Username does not contain only digits
+ * 
+ * Postconditions:
+ * - User row in mysql is linked to user object in acn by acn_id
+ * - Either user is added to both databases or not at all
+ * - User is created with normal privileges
+ * - User id, username, and acn_id are unique (independently, not jointly)
+ */
 exports.createUser = async function (req, res) {
     console.log('Create new user');
     const knex = req.app.locals.knex;
@@ -162,7 +231,8 @@ exports.createUser = async function (req, res) {
             });
         } else if (err.response.status === 400 &&
                 err.response.data.code === 202) {
-            console.error(`Username ${t_username} exists in acn but not in mysql`);
+            console.error(`Username ${t_username} exists in acn but` + 
+                    ` not in mysql`);
             res.status(400).json({
                 error: 'User with this username already exists'
             });
@@ -240,6 +310,40 @@ exports.createUser = async function (req, res) {
     });
 };
 
+/**
+ * Promote a user to admin status
+ * 
+ * In: URL params
+ * - userIdent: <String>
+ * In: Headers
+ * - X-Parse-Session-Token: <String>
+ * 
+ * Out:
+ *  Success: JSON
+ * {
+ *  "userIdent": <String>,
+ *  "match": <String {"id" | "username"}>
+ * }
+ *  Failure: JSON, status != 200
+ * {
+ *  "error": <String>
+ * }
+ * 
+ * Preconditions:
+ * - Target user identifier is either an alnum/_ string (ident interpreted as 
+ *   username) or an all-digit string (ident interpreted as user id)
+ * - Target user exists
+ * - Calling user is authenticated with session token
+ * - Calling user is admin
+ * 
+ * Postconditions:
+ * - Target user is promoted to admin if not already admin
+ * - No change to calling user
+ * - No change to target user if already admin
+ * - Either 0 or 1 users affected
+ * - Target user's session token remains valid
+ * - Idempotent
+ */
 exports.promoteUserToAdmin = async function (req, res) {
     console.log('Promote to admin');
 
@@ -261,7 +365,7 @@ exports.promoteUserToAdmin = async function (req, res) {
         ret_object.match = 'username';
     } else {
         res.status(400).json({
-            error: 'Malformed user ident'
+            error: 'Malformed user identifier'
         });
         return;
     }
@@ -295,6 +399,35 @@ exports.promoteUserToAdmin = async function (req, res) {
     }
 };
 
+/**
+ * Get the current user profile
+ * 
+ * In: Headers
+ * - X-Parse-Session-Token: <String>
+ * 
+ * Out: 
+ *  Success: JSON
+ * {
+ *  "id": <Number>,
+ *  "username": <String>,
+ *  "long_name": <String>,
+ *  "acn_id": <String>,
+ *  "user_type": <Number>,
+ *  "acn_extra": <Object>
+ * }
+ *  Failure: JSON, status != 200
+ * {
+ *  "error": <String>
+ * }
+ * 
+ * Preconditions:
+ * - User is authenticated with session token
+ * 
+ * Postconditions:
+ * - Only the current user's information is returned
+ * - No change to database
+ * - Idempotent
+ */
 exports.getCurrentUser = async function (req, res) {
     console.log('Get current user');
     let user_object_id = req.acn_session.user.objectId;
@@ -324,7 +457,28 @@ exports.getCurrentUser = async function (req, res) {
     res.json(row);
 };
 
-exports.deleteUser = async function (req, res) {
+/**
+ * Delete the current user, subject to integrity constraints
+ * 
+ * In: Headers
+ * - X-Parse-Session-Token: <String>
+ * 
+ * Out:
+ *  Success: 200 OK
+ *  Failure: JSON, status != 200
+ * {
+ *  "error": <String>
+ * }
+ * 
+ * Precondition:
+ * - User is authenticated with session token
+ * 
+ * Postconditions:
+ * - Only the current calling user is affected
+ * - Database integrity constraints are preserved
+ * - Either user is removed from both databases or not at all
+ */
+exports.deleteCurrentUser = async function (req, res) {
     // Attempt db delete (may or may not fail due to constraints)
     console.log('Deleting current user');
     let user_object_id = req.acn_session.user.objectId;
