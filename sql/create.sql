@@ -1,16 +1,18 @@
--- lepak.sg:24573/esc-1
+-- ticket.lepak.sg:7707/esc1
 
-drop database `esc-1`;
-create database `esc-1`
+drop database `esc1`;
+create database `esc1`
 	character set utf8mb4 
 	collate utf8mb4_unicode_ci;
-use `esc-1`;
+use `esc1`;
 
 -- Use accenture user management
 create table users (
 	id integer primary key auto_increment,
-    username varchar(100) not null,
+    username varchar(100) unique not null,
     long_name varchar(100) not null,
+    email varchar(100) not null,
+    phone varchar(100) not null,
     acn_id varchar(100) unique not null,		-- objectId
 	acn_session_token varchar(100),				-- sessionToken
     acn_session_token_expiry datetime,	        -- token expiry (UTC)
@@ -28,8 +30,10 @@ create table teams (
 create table admin_team_relation (
 	team_id integer not null,
     admin_id integer not null,
-    foreign key fk_admin_team_relation_teams_id (team_id) references teams(id),
-    foreign key fk_admin_team_relation_users_id (admin_id) references users(id),
+    foreign key fk_admin_team_relation_teams_id (team_id) references teams(id)
+        on delete cascade,      -- Delete team should remove itself from its members
+    foreign key fk_admin_team_relation_users_id (admin_id) references users(id)
+        on delete cascade,      -- Delete user should remove them from their teams
     unique (team_id, admin_id)
 );
 
@@ -42,9 +46,12 @@ create table tickets (
     priority integer,
     severity integer,
     assigned_team integer,
-    foreign key fk_tickets_teams_id (assigned_team) references teams(id),
+    `status` integer,
+    foreign key fk_tickets_teams_id (assigned_team) references teams(id)
+        on delete restrict,	   -- Don't delete team if it has a ticket
     opener_user integer not null,
     foreign key fk_tickets_users_id (opener_user) references users(id)
+        on delete restrict     -- Don't delete user if they have a ticket
 );
 
 create table attachments (
@@ -52,10 +59,12 @@ create table attachments (
     title varchar(100) not null,
     fs_path varchar(1000) not null,			-- Make sure filesystem and db are consistent (how?)
     upload_time datetime not null,
-    ticket_id integer,						-- Careful with this: orphaned attachments that are too old should be deleted
-    foreign key fk_attachments_tickets_id (ticket_id) references tickets(id),
+    ticket_id integer,						-- Careful with this: orphaned attachments that are too old should be deleted (cron job?)
+    foreign key fk_attachments_tickets_id (ticket_id) references tickets(id)
+        on delete restrict,     -- Need to delete attachment from fs first!
     uploader_user integer not null,
     foreign key fk_attachments_users_id (uploader_user) references users(id)
+        on delete restrict      -- Don't delete user if they have attachment
 );
 
 create table chatrooms (
@@ -63,6 +72,7 @@ create table chatrooms (
     description varchar(1000) not null,
     ticket_id integer unique,
     foreign key fk_chatrooms_tickets_id (ticket_id) references tickets(id)
+        on delete cascade       -- Delete ticket should delete chatroom too
 );
 
 create table chat_messages (
@@ -70,9 +80,11 @@ create table chat_messages (
     message varchar(1000) not null,
     sent_time datetime not null,			-- UTC
     sent_user_id integer not null,
-    foreign key fk_chat_messages_users_id (sent_user_id) references users(id),
+    foreign key fk_chat_messages_users_id (sent_user_id) references users(id)
+        on delete restrict,     -- Don't delete user if they have messages
     chatroom_id integer not null,
     foreign key fk_chat_messages_chatrooms_id (chatroom_id) references chatrooms(id)
+        on delete cascade       -- Delete chatroom should delete its messages
 );
 
 
