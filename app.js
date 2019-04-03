@@ -3,10 +3,10 @@ const app = express();
 const port = 5000;
 const bodyparser = require('body-parser');
 
-const tickets = require('./handlers/tickets');
-const attachments = require('./handlers/attachments');
-const users = require('./handlers/users');
-const login = require('./middleware/login');
+const users_router = require('./routers/users');
+const tickets_router = require('./routers/tickets');
+const attachments_router = require('./routers/attachments');
+const teams_router = require('./routers/teams');
 
 app.use(bodyparser.json());
 
@@ -46,63 +46,10 @@ function info(req, res) {
 app.get('/', info);
 app.get('/version', info);
 
-app.get('/ticket/:ticketId(\\d+)',
-        tickets.getById);
-
-app.get('/ticket/byUser', 
-        login.checkSessionToken, 
-        tickets.getAllByUser);
-
-app.post('/ticket', 
-        login.checkSessionToken, 
-        tickets.createNew);
-
-app.put('/ticket/:ticketId(\\d+)', 
-        login.checkSessionToken,
-        tickets.update);
-
-app.put('/ticket/:ticketId/attachment',
-        login.checkSessionToken, 
-        attachments.uploadToTicket);
-
-app.get('/attachment/:attachmentId',
-        login.checkSessionToken,
-        attachments.get);
-
-app.post('/attachment',
-        login.checkSessionToken,
-        attachments.upload);
-
-app.put('/attachment/:attachmentId(\\d+)/linkToTicket/:ticketId(\\d+)',
-        login.checkSessionToken,
-        attachments.linkToTicket);
-
-app.delete('/attachment/:attachmentId(\\d+)',
-        login.checkSessionToken,
-        attachments.delete);
-
-app.delete('/attachment',
-        login.checkSessionToken,
-        attachments.delete);
-
-app.get('/user/login',
-        users.login);
-
-app.post('/user',
-        users.createUser);
-
-app.put('/user/:userIdent/promoteToAdmin',
-        login.checkSessionToken,
-        login.userIsAdmin,
-        users.promoteUserToAdmin);
-
-app.get('/user/me',
-        login.checkSessionToken,
-        users.getCurrentUser);
-
-app.delete('/user/me',
-        login.checkSessionToken,
-        users.deleteCurrentUser);
+app.use('/user', users_router);
+app.use('/ticket', tickets_router);
+app.use('/attachment', attachments_router);
+app.use('/team', teams_router);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);
