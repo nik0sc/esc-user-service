@@ -18,8 +18,4 @@ router.put('/:ticketId(\\d+)',
         login.checkSessionToken,
         tickets.update);
 
-router.put('/:ticketId/attachment',
-        login.checkSessionToken, 
-        attachments.uploadToTicket);
-
 module.exports = router;

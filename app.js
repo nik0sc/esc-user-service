@@ -15,9 +15,7 @@ app.locals.knex = require('knex')({
     connection: process.env.DATABASE_URL
 });
 
-const axios = require('axios');
-
-app.locals.acn_axios = axios.create({
+app.locals.acn_axios = require('axios').create({
     baseURL: 'https://ug-api.acnapiv3.io/swivel/acnapi-common-services/common',
     timeout: 3000,
     headers: {
@@ -34,13 +32,11 @@ app.use((req, res, next) => {
 });
 
 function info(req, res) {
-    let git_rev = (typeof process.env.GIT_REV === 'undefined') 
-            ? 'Not deployed'
-            : process.env.GIT_REV;
-
     res.json({
         name: 'esc-ticket-service',
-        rev: git_rev
+        rev: (typeof process.env.GIT_REV === 'undefined') 
+                ? 'Not deployed'
+                : process.env.GIT_REV
     });
 }
 app.get('/', info);
