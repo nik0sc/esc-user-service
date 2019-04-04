@@ -44,6 +44,8 @@ app.use((req, res, next) => {
         if (matched) {
             res.header('Access-Control-Allow-Origin', origin);
             console.log(`Origin: ${origin} is allowed`);
+        } else {
+            console.log(`Disallowed origin: ${origin}`);
         }
     } else {
         console.log('No origin');
