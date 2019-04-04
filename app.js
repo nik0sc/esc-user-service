@@ -39,9 +39,7 @@ app.use((req, res, next) => {
     const origin = req.header('Origin');
 
     if (typeof origin !== 'undefined') {
-        let matched = allowed_origins.some((regexp) => origin.match(regexp));
-
-        if (matched) {
+        if (allowed_origins.some((regexp) => origin.match(regexp))) {
             res.header('Access-Control-Allow-Origin', origin);
             console.log(`Origin: ${origin} is allowed`);
         } else {
