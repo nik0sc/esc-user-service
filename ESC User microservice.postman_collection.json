@@ -1,175 +1,10 @@
 {
 	"info": {
-		"_postman_id": "de6c87e1-7f6f-4792-8bfd-3610e44607d9",
-		"name": "ESC Ticket microservice",
+		"_postman_id": "fb685a18-9a1b-4d61-ab51-cd0d37eea366",
+		"name": "ESC User microservice",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
-		{
-			"name": "Get Ticket",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "7adca5ff-e8ed-4b2d-8a2f-103d5b0f1189",
-						"exec": [
-							"pm.environment.set(\"ticketId\", \"1\");"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "X-Parse-Session-Token",
-						"value": "{{sessionToken}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{baseUrl}}/ticket/{{ticketId}}",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"ticket",
-						"{{ticketId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update Ticket with Attachment",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "7adca5ff-e8ed-4b2d-8a2f-103d5b0f1189",
-						"exec": [
-							"pm.environment.set(\"ticketId\", \"1\");"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "X-Parse-Session-Token",
-						"type": "text",
-						"value": "{{sessionToken}}"
-					}
-				],
-				"body": {
-					"mode": "file",
-					"file": {}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/ticket/{{ticketId}}/attachment",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"ticket",
-						"{{ticketId}}",
-						"attachment"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create Ticket",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "7adca5ff-e8ed-4b2d-8a2f-103d5b0f1189",
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "X-Parse-Session-Token",
-						"value": "{{sessionToken}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"title\": \"Yet another pointless ticket\",\n\t\"message\": \"I am getting a widgetization error when I attempt to confound the heterozygote\",\n\t\"priority\": 4,\n\t\"severity\": 4\n}"
-				},
-				"url": {
-					"raw": "{{baseUrl}}/ticket",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"ticket"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get Ticket by User Token",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "X-Parse-Session-Token",
-						"value": "{{sessionToken}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{baseUrl}}/ticket/byUser",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"ticket",
-						"byUser"
-					]
-				},
-				"description": "List all tickets opened by the current user."
-			},
-			"response": []
-		},
 		{
 			"name": "Get Version",
 			"request": {
@@ -359,9 +194,9 @@
 	],
 	"variable": [
 		{
-			"id": "d27780d1-04e2-462c-a2d6-014e5a40f34b",
+			"id": "eac371c5-4759-443d-801b-251dda9041d9",
 			"key": "baseUrl",
-			"value": "https://esc-ticket-service.lepak.sg",
+			"value": "https://user-service.ticket.lepak.sg",
 			"type": "string"
 		}
 	]

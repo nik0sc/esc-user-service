@@ -3,8 +3,6 @@ const app = express();
 const bodyparser = require('body-parser');
 
 const users_router = require('./routers/users');
-const tickets_router = require('./routers/tickets');
-const attachments_router = require('./routers/attachments');
 const teams_router = require('./routers/teams');
 
 app.use(bodyparser.json());
@@ -54,7 +52,7 @@ app.use((req, res, next) => {
 
 function info(req, res) {
     res.json({
-        name: 'esc-ticket-service',
+        name: 'esc-user-service',
         rev: (typeof process.env.GIT_REV === 'undefined') 
                 ? 'Not deployed'
                 : process.env.GIT_REV
@@ -64,10 +62,8 @@ app.get('/', info);
 app.get('/version', info);
 
 app.use('/user', users_router);
-app.use('/ticket', tickets_router);
-app.use('/attachment', attachments_router);
 app.use('/team', teams_router);
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}!`);
+    console.log(`Users service listening on port ${port}!`);
 });
