@@ -1,5 +1,5 @@
 /**
- * Login user
+ * Login user with username and password, getting a session_token back
  * 
  * In: JSON
  * {
@@ -15,6 +15,8 @@
  *  "long_name": <String>,
  *  "acn_id": <String>,
  *  "user_type": <Number>,
+ *  "email": <String>,
+ *  "phone": <String>,
  *  "session_token": <String>,
  *  "acn_extra": <Object>
  * }
@@ -95,7 +97,7 @@ exports.login = async function (req, res) {
 
     let query = knex('users')
     .first('users.id', 'users.username', 'users.long_name', 'users.acn_id',
-    'users.user_type')
+    'users.user_type', 'users.email', 'users.phone')
     .where('users.acn_id', res2.data.objectId);
 
     console.log(query.toString());
@@ -124,7 +126,9 @@ exports.login = async function (req, res) {
  * {
  *  "username": <String>,
  *  "password": <String>,
- *  "long_name": <String>
+ *  "long_name": <String>,
+ *  "email": <String> [Optional],
+ *  "phone": <String> [Optional]
  * }
  * 
  * Out:
@@ -145,6 +149,8 @@ exports.login = async function (req, res) {
  * - User with this username does not already exist in either mysql or acn
  * - Username contains only alnum and underscore characters
  * - Username does not contain only digits
+ * - Email must match email pattern
+ * - Phone must match phone pattern
  * 
  * Postconditions:
  * - User row in mysql is linked to user object in acn by acn_id
@@ -190,6 +196,21 @@ exports.createUser = async function (req, res) {
 
     let t_long_name = (typeof req.body.long_name !== 'undefined') 
             ? req.body.long_name : '';
+    
+    let t_email = (typeof req.body.email !== 'undefined')
+            ? req.body.email : '';
+    // Don't try to verify the email. Frontend should have made sure through the
+    // verification service
+
+    let t_phone = (typeof req.body.phone !== 'undefined')
+            ? req.body.phone : '';
+    // This is not a very good pattern, but it'll work for most
+    if (!t_phone.match(/^\+?[0-9- ]+$/)) {
+        res.status(400).json({
+            error: 'Malformed phone number'
+        });
+        return;
+    }
 
     // Get in, get out
     let test_query = knex('users')
@@ -259,7 +280,9 @@ exports.createUser = async function (req, res) {
         long_name: t_long_name,
         acn_id: t_acn_id,
         acn_session_token: t_session_token,
-        user_type: 1 // Normal user by default
+        user_type: 1, // Normal user by default
+        email: t_email,
+        phone: t_phone
     });
     console.log(query.toString());
 
@@ -413,6 +436,8 @@ exports.promoteUserToAdmin = async function (req, res) {
  *  "long_name": <String>,
  *  "acn_id": <String>,
  *  "user_type": <Number>,
+ *  "email": <String>,
+ *  "phone": <String>,
  *  "acn_extra": <Object>
  * }
  *  Failure: JSON, status != 200
@@ -437,7 +462,7 @@ exports.getCurrentUser = async function (req, res) {
 
     let query = knex('users')
     .first('users.id', 'users.username', 'users.long_name', 'users.acn_id',
-    'users.user_type')
+    'users.user_type', 'users.email', 'users.phone')
     .where('users.acn_id', user_object_id);
 
     console.log(query.toString());
