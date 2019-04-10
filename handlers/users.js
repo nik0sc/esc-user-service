@@ -1,3 +1,5 @@
+const validation = require('../validation');
+
 /**
  * Login user with username and password, getting a session_token back
  * 
@@ -149,7 +151,7 @@ exports.login = async function (req, res) {
  * - User with this username does not already exist in either mysql or acn
  * - Username contains only alnum and underscore characters
  * - Username does not contain only digits
- * - Email must match email pattern
+ * - Email must be verified by frontend
  * - Phone must match phone pattern
  * 
  * Postconditions:
@@ -164,22 +166,24 @@ exports.createUser = async function (req, res) {
     const acn_axios = req.app.locals.acn_axios;
 
     let t_username = req.body.username;
-    if (typeof t_username === 'undefined') {
+    if (typeof t_username === 'undefined' || t_username === '') {
         res.status(400).json({
             error: 'No username provided'
         });
         return;
     }
 
+    let ident_validation = validation.validateUserIdent(t_username);
+
     // Validate username: Must comprise alnum or _, but not entirely digits 
-    if (t_username.match(/^\d+$/)) {
+    if (ident_validation === 'id') {
         res.status(400).json({
             error: 'Username cannot be made up of all digits'
         });
         return;
     }
 
-    if (t_username.match(/^[^a-zA-Z0-9_]$/)) {
+    if (ident_validation === false) {
         res.status(400).json({
             error: 'Username contains non-alnum or non-underscore characters'
         });
@@ -378,14 +382,10 @@ exports.promoteUserToAdmin = async function (req, res) {
     .update('user_type', 2)
     .limit(1);
 
-    if (t_user_ident.match(/^\d+$/)) {
-        // User id
-        query = query.where('id', t_user_ident);
-        ret_object.match = 'id';
-    } else if (t_user_ident.match(/^[a-zA-Z0-9_]+$/)) {
-        // Username
-        query = query.where('username', t_user_ident);
-        ret_object.match = 'username';
+    let ident_validation = validation.validateUserIdent(t_user_ident);
+    if (typeof ident_validation === 'string') {
+        query = query.where(ident_validation, t_user_ident);
+        ret_object.match = ident_validation;
     } else {
         res.status(400).json({
             error: 'Malformed user identifier'
