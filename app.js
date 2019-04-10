@@ -24,6 +24,18 @@ app.locals.acn_axios = require('axios').create({
     }
 });
 
+if (typeof process.env.TICKET_SERVICE_BASE_URL === 'undefined') {
+    console.error('TICKET_SERVICE_BASE_URL is not in environment');
+} 
+
+app.locals.ticket_axios = require('axios').create({
+    baseURL: process.env.TICKET_SERVICE_BASE_URL,
+    timeout: 3000,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
 // Allow XHR from some places only
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Origin, X-Parse-Session-Token, X-Requested-With, Content-Type');
