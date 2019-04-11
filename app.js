@@ -4,6 +4,7 @@ const bodyparser = require('body-parser');
 
 const users_router = require('./routers/users');
 const teams_router = require('./routers/teams');
+const common = require('./middleware/common');
 
 app.use(bodyparser.json());
 
@@ -37,30 +38,7 @@ app.locals.ticket_axios = require('axios').create({
 });
 
 // Allow XHR from some places only
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Parse-Session-Token, X-Requested-With, Content-Type');
-    res.header('Vary', 'Origin');
-
-    const allowed_origins = [
-        /^http:\/\/localhost(:\d+)*$/,
-        /^https:\/\/(frontend.)?ticket.lepak.sg$/
-    ];
-
-    const origin = req.header('Origin');
-
-    if (typeof origin !== 'undefined') {
-        if (allowed_origins.some((regexp) => origin.match(regexp))) {
-            res.header('Access-Control-Allow-Origin', origin);
-            console.log(`Origin: ${origin} is allowed`);
-        } else {
-            console.log(`Disallowed origin: ${origin}`);
-        }
-    } else {
-        console.log('No origin');
-    }
-
-    next();
-});
+app.use(common.xhrAllowWhitelistOrigins);
 
 function info(req, res) {
     res.json({
