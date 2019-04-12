@@ -1,7 +1,8 @@
 /**
  * Validate a user identifier as either of:
  * - an id number,
- * - a username, or
+ * - a username, 
+ * - an ACN API user objectId, or
  * - invalid
  * This function expects a string parameter. An integer parameter will fail 
  * to validate. This is by design
@@ -22,8 +23,17 @@ exports.validateUserIdent = function (userIdent) {
         return 'id';
     }
 
-    if (userIdent.match(/^[a-zA-Z0-9_]+$/)) {
-        return 'username';
+    // if (userIdent.match(/^[a-zA-Z0-9_]+$/)) {
+    //     return 'username';
+    // }
+
+    let alnum_match = userIdent.match(/^(?<acn>acn:)?[a-zA-Z0-9_]+$/);
+    if (alnum_match) {
+        if (alnum_match.groups.acn) {
+            return 'acn_id';
+        } else {
+            return 'username';
+        }
     }
 
     return false;

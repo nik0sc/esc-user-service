@@ -247,6 +247,7 @@ exports.createUser = async function (req, res) {
         res2 = await acn_axios.post('/users', {
             username: t_username,
             password: t_password
+            // user_type: 1
         });
     } catch (err) {
         if (err.response.status === 504) {
@@ -511,5 +512,82 @@ exports.deleteCurrentUser = async function (req, res) {
     const acn_axios = req.app.locals.acn_axios;
 
     // Roll back if acn delete fails
-    knex.transaction()
+    // knex.transaction();
 }
+
+/**
+ * Get the specified user's public profile to check for admin status
+ * 
+ * In: URL params
+ * - userIdent: <String>
+ * 
+ * Out: 
+ *  Success: JSON
+ * {
+ *  "id": <Number>,
+ *  "username": <String>,
+ *  "acn_id": <String>,
+ *  "user_type": <Number>,
+ *  "match": <String>,
+ *  "is_admin": <Boolean>
+ * }
+ *  Failure: JSON, status != 200
+ * {
+ *  "error": <String>
+ * }
+ * 
+ * Preconditions:
+ * - User is authenticated with session token
+ * - X-Parse-Session-Token is not needed
+ * 
+ * Postconditions:
+ * - Only the specified user's public information is returned
+ * - No emails or phone numbers to be returned!!!
+ * - No change to database
+ * - Idempotent
+ */
+exports.checkIsAdmin = function (req, res) {
+    console.log(`Check admin on ${userIdent}`);
+
+    let t_user_ident = req.params.userIdent;
+    const knex = req.app.locals.knex;
+
+    let query = knex('users')
+    .first('id', 'username', 'acn_id', 'user_type');
+
+    let ident_validation = validation.validateUserIdent(t_user_ident);
+    if (typeof ident_validation === 'string') {
+        query = query.where(ident_validation, t_user_ident);
+        // ret_object.match = ident_validation;
+    } else {
+        res.status(400).json({
+            error: 'Malformed user identifier'
+        });
+        return;
+    }
+
+    console.log(query.toString());
+
+    let row;
+    try {
+        row = await query;
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            error: 'Db error',
+            ex: err.toString()
+        });
+        return;
+    }
+    
+    if (typeof row === 'undefined') {
+        res.status(404).json({
+            error: 'User not found',
+            match: ident_validation
+        });
+    } else {
+        row.match = ident_validation;
+        row.is_admin = (row.user_type === 2);
+        res.json(row);
+    }
+};
