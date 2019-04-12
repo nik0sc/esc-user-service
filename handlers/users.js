@@ -32,6 +32,7 @@ const validation = require('../validation');
  * 
  * Postconditions:
  * - Existing tokens for this user are still valid
+ *      ^ Actually this is totally out of our control...
  * - Idempotent
  */
 exports.login = async function (req, res) {
@@ -110,6 +111,14 @@ exports.login = async function (req, res) {
     } catch (err) {
         res.status(500).json({
             error: 'Db error'
+        });
+        return;
+    }
+
+    if (typeof row === 'undefined') {
+        console.error(`User ${t_username} not found in mysql`);
+        res.status(401).json({
+            error: 'Invalid username or password'
         });
         return;
     }
@@ -209,7 +218,7 @@ exports.createUser = async function (req, res) {
     let t_phone = (typeof req.body.phone !== 'undefined')
             ? req.body.phone : '';
     // This is not a very good pattern, but it'll work for most
-    if (!t_phone.match(/^\+?[0-9- ]+$/)) {
+    if (!t_phone.match(/^\+?[0-9- ]*$/)) {
         res.status(400).json({
             error: 'Malformed phone number'
         });
@@ -546,11 +555,10 @@ exports.deleteCurrentUser = async function (req, res) {
  * - No change to database
  * - Idempotent
  */
-exports.checkIsAdmin = function (req, res) {
-    console.log(`Check admin on ${userIdent}`);
-
+exports.checkIsAdmin = async function (req, res) {
     let t_user_ident = req.params.userIdent;
     const knex = req.app.locals.knex;
+    console.log(`Check admin on ${t_user_ident}`);
 
     let query = knex('users')
     .first('id', 'username', 'acn_id', 'user_type');
