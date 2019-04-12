@@ -41,7 +41,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"username\": \"dummy_user\",\n\t\"password\": \"Password1!\",\n\t\"long_name\": \"Dummy User\"\n}"
+					"raw": "{\n\t\"username\": \"dummy_user_2\",\n\t\"password\": \"Password1!\",\n\t\"long_name\": \"Dummy User 2\",\n\t\"email\": \"mail@example.com\",\n\t\"phone\": \"9234 5678\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/user",
@@ -58,11 +58,8 @@
 		},
 		{
 			"name": "Login",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
-				"method": "GET",
+				"method": "POST",
 				"header": [
 					{
 						"key": "Content-Type",
@@ -168,6 +165,312 @@
 				"description": "User holding the session token must be an admin. In other words, only an admin can promote other users to admin status.\nThe promotion is idempotent. userIdent can be either an all-digit string, in which case the ident is treated as an user id, or a mixed alnum/underscore string, in which case the ident is treated as a username."
 			},
 			"response": []
+		},
+		{
+			"name": "Check User Is Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2859775e-2114-4569-a489-dff592da14aa",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "75338ab6-d1e0-43c1-9115-eefbef7b6f55",
+						"exec": [
+							"pm.environment.set(\"userIdent\", \"dummy_user_2\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/{{userIdent}}/isAdmin",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{userIdent}}",
+						"isAdmin"
+					]
+				},
+				"description": "Check if this user is an admin. No token required"
+			},
+			"response": []
+		},
+		{
+			"name": "[WIP] Delete Current User",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/me",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"me"
+					]
+				},
+				"description": "Delete the current user. THIS API IS A WORK IN PROGRESS!"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Team",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"type": "text",
+						"value": "{{sessionToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"team_name\": \"Dummy Team\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/team",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"team"
+					]
+				},
+				"description": "Calling user must be admin"
+			},
+			"response": []
+		},
+		{
+			"name": "Add Admin to Team",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cfb29678-e4ca-414f-b493-a45705cec2b5",
+						"exec": [
+							"pm.environment.set(\"teamId\", \"1\");",
+							"pm.environment.set(\"adminIdent\", \"dummy_user\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/team/{{teamId}}/admin/{{adminIdent}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"team",
+						"{{teamId}}",
+						"admin",
+						"{{adminIdent}}"
+					]
+				},
+				"description": "Only an admin can call this API. Only an admin can be added to a team."
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Admin from Team",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cfb29678-e4ca-414f-b493-a45705cec2b5",
+						"exec": [
+							"pm.environment.set(\"teamId\", \"1\");",
+							"pm.environment.set(\"adminIdent\", \"dummy_user\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"type": "text",
+						"value": "{{sessionToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/team/{{teamId}}/admin/{{adminIdent}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"team",
+						"{{teamId}}",
+						"admin",
+						"{{adminIdent}}"
+					]
+				},
+				"description": "Only an admin can call this API. Only an admin can be added to a team."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Current Admin's Teams",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/team/me",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"team",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Team",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"type": "text",
+						"value": "{{sessionToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/team/{{teamId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"team",
+						"{{teamId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Team",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"type": "text",
+						"value": "{{sessionToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/team/{{teamId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"team",
+						"{{teamId}}"
+					]
+				},
+				"description": "Any admin can delete any team."
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -194,7 +497,7 @@
 	],
 	"variable": [
 		{
-			"id": "eac371c5-4759-443d-801b-251dda9041d9",
+			"id": "6e51d99c-deb2-4062-870b-a4732092d915",
 			"key": "baseUrl",
 			"value": "https://user-service.ticket.lepak.sg",
 			"type": "string"
