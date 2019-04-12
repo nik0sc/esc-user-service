@@ -520,6 +520,10 @@ exports.deleteCurrentUser = async function (req, res) {
     const knex = req.app.locals.knex;
     const acn_axios = req.app.locals.acn_axios;
 
+    res.status(501).json({
+        error: 'Not implemented yet'
+    });
+
     // Roll back if acn delete fails
     // knex.transaction();
 }
