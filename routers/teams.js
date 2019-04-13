@@ -8,12 +8,12 @@ router.post('/',
         login.userIsAdmin,
         teams.createTeam);
 
-router.put('/:teamId(\\d+)/admin/:adminIdent',
+router.put('/:teamIdent/admin/:adminIdent',
         login.checkSessionToken,
         login.userIsAdmin,
         teams.addAdminToTeam);
 
-router.delete('/:teamId(\\d+)/admin/:adminIdent',
+router.delete('/:teamIdent/admin/:adminIdent',
         login.checkSessionToken,
         login.userIsAdmin,
         teams.removeAdminFromTeam);
@@ -23,11 +23,11 @@ router.get('/me',
         login.userIsAdmin,
         teams.getCurrentAdminTeams);
 
-router.get('/:teamId(\\d+)',
+router.get('/:teamIdent',
         login.checkSessionToken,
         teams.getTeam);
 
-router.delete('/:teamId(\\d+)',
+router.delete('/:teamIdent',
         login.checkSessionToken,
         login.userIsAdmin,
         teams.deleteTeam);

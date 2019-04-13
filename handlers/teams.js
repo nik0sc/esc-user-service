@@ -80,11 +80,9 @@ exports.createTeam = async function (req, res) {
 /**
  * Add an admin to a team
  * 
- * In: JSON
- * {
- *  "team_ident": <String>,
- *  "user_ident": <String>
- * }
+ * In: URL params
+ * - teamIdent: <String>
+ * - userIdent: <String>
  * 
  * Out:
  *  Success: status == 200
@@ -109,7 +107,7 @@ exports.createTeam = async function (req, res) {
 exports.addAdminToTeam = async function (req, res) {
     const knex = req.app.locals.knex;
 
-    const t_team_ident = req.body.team_ident;
+    const t_team_ident = req.params.teamIdent;
     const team_ident_validation = validation.validateTeamIdent(t_team_ident);
 
     if (team_ident_validation === false) {
@@ -119,7 +117,7 @@ exports.addAdminToTeam = async function (req, res) {
         return;
     }
 
-    const t_user_ident = req.body.user_ident;
+    const t_user_ident = req.params.userIdent;
     const user_ident_validation = validation.validateUserIdent(t_user_ident);
 
     if (user_ident_validation === false) {
@@ -173,11 +171,9 @@ exports.addAdminToTeam = async function (req, res) {
 /**
  * Remove an admin from a team
  * 
- * In: JSON
- * {
- *  "team_ident": <String>,
- *  "user_ident": <String>
- * }
+ * In: URL params
+ * - teamIdent: <String>
+ * - userIdent: <String>
  * 
  * Out:
  *  Success: status == 200
@@ -202,7 +198,7 @@ exports.addAdminToTeam = async function (req, res) {
 exports.removeAdminFromTeam = async function (req, res) {
     const knex = req.app.locals.knex;
 
-    const t_team_ident = req.body.team_ident;
+    const t_team_ident = req.params.teamIdent;
     const team_ident_validation = validation.validateTeamIdent(t_team_ident);
 
     if (team_ident_validation === false) {
@@ -212,7 +208,7 @@ exports.removeAdminFromTeam = async function (req, res) {
         return;
     }
 
-    const t_user_ident = req.body.user_ident;
+    const t_user_ident = req.params.userIdent;
     const user_ident_validation = validation.validateUserIdent(t_user_ident);
 
     if (user_ident_validation === false) {
@@ -259,10 +255,8 @@ exports.removeAdminFromTeam = async function (req, res) {
 /**
  * Delete a team
  * 
- * In: JSON
- * {
- *  "team_ident": <String>
- * }
+ * In: URL params
+ * - teamIdent: <String>
  * 
  * Out:
  *  Success: status == 200
@@ -289,7 +283,7 @@ exports.deleteTeam = async function (req, res) {
     const ticket_axios = req.app.locals.ticket_axios;
 
     // Validate team ident
-    const t_team_ident = req.body.team_ident;
+    const t_team_ident = req.params.teamIdent;
     const team_ident_validation = validation.validateTeamIdent(t_team_ident);
 
     if (team_ident_validation === false) {
@@ -398,9 +392,9 @@ exports.deleteTeam = async function (req, res) {
  * - Idempotent
  */
 exports.getCurrentAdminTeams = async function (req, res) {
-
+    res.status(501).end();
 };
 
 exports.getTeam = async function (req, res) {
-
+    res.status(501).end();
 };
