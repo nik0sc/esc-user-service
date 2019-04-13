@@ -167,7 +167,7 @@
 			"response": []
 		},
 		{
-			"name": "Check User Is Admin",
+			"name": "Get User Public Profile",
 			"event": [
 				{
 					"listen": "test",
@@ -204,14 +204,14 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseUrl}}/user/{{userIdent}}/isAdmin",
+					"raw": "{{baseUrl}}/user/{{userIdent}}/public",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"user",
 						"{{userIdent}}",
-						"isAdmin"
+						"public"
 					]
 				},
 				"description": "Check if this user is an admin. No token required"
@@ -497,7 +497,7 @@
 	],
 	"variable": [
 		{
-			"id": "306e6e36-0423-486f-82bd-eda81a10e18a",
+			"id": "43015b53-f436-4e31-baa3-a6005c783008",
 			"key": "baseUrl",
 			"value": "https://user-service.ticket.lepak.sg",
 			"type": "string"

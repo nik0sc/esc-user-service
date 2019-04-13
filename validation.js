@@ -11,7 +11,7 @@
  * - userIdent: <String>
  * 
  * Out:
- * {false | "id" | "username"}
+ * {false | "id" | "username" | "acn_id"}
  */
 exports.validateUserIdent = function (userIdent) {
     if (typeof userIdent !== 'string' || userIdent === '') {

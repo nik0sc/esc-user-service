@@ -22,7 +22,7 @@ router.delete('/me',
         login.checkSessionToken,
         users.deleteCurrentUser);
 
-router.get('/:userIdent/isAdmin',
-        users.checkIsAdmin);
+router.get('/:userIdent/public',
+        users.getPublicProfile);
 
 module.exports = router;

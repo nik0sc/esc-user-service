@@ -368,7 +368,8 @@ exports.createUser = async function (req, res) {
  * 
  * Preconditions:
  * - Target user identifier is either an alnum/_ string (ident interpreted as 
- *   username) or an all-digit string (ident interpreted as user id)
+ *   acn id if prefaced with "acn:" or username otherwise) or an all-digit 
+ *   string (ident interpreted as user id)
  * - Target user exists
  * - Calling user is authenticated with session token
  * - Calling user is admin
@@ -529,7 +530,7 @@ exports.deleteCurrentUser = async function (req, res) {
 }
 
 /**
- * Get the specified user's public profile to check for admin status
+ * Get the specified user's public profile
  * 
  * In: URL params
  * - userIdent: <String>
@@ -559,7 +560,7 @@ exports.deleteCurrentUser = async function (req, res) {
  * - No change to database
  * - Idempotent
  */
-exports.checkIsAdmin = async function (req, res) {
+exports.getPublicProfile = async function (req, res) {
     let t_user_ident = req.params.userIdent;
     const knex = req.app.locals.knex;
     console.log(`Check admin on ${t_user_ident}`);
