@@ -13,7 +13,7 @@ create table users (
     long_name varchar(100) not null,
     email varchar(100) not null,
     phone varchar(100) not null,
-    acn_id varchar(100) unique not null,		-- objectId
+    acn_id varchar(20) unique not null,		    -- objectId
 	acn_session_token varchar(100),				-- sessionToken
     acn_session_token_expiry datetime,	        -- token expiry (UTC)
     user_type integer not null,					-- normal or admin?
