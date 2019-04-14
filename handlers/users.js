@@ -570,6 +570,11 @@ exports.getPublicProfile = async function (req, res) {
 
     let ident_validation = validation.validateUserIdent(t_user_ident);
     if (typeof ident_validation === 'string') {
+        if (ident_validation === 'acn_id') {
+            // Remove the 'acn:' prefix
+            t_user_ident = t_user_ident.substring(4);
+        }
+
         query = query.where(ident_validation, t_user_ident);
         // ret_object.match = ident_validation;
     } else {
