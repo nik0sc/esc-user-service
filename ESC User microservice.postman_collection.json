@@ -219,6 +219,62 @@
 			"response": []
 		},
 		{
+			"name": "Get User Full Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2859775e-2114-4569-a489-dff592da14aa",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "75338ab6-d1e0-43c1-9115-eefbef7b6f55",
+						"exec": [
+							"pm.environment.set(\"userIdent\", \"sutdtesting1\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Parse-Session-Token",
+						"value": "{{sessionToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/{{userIdent}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{userIdent}}"
+					]
+				},
+				"description": "Calling user needs to be the same user or an admin"
+			},
+			"response": []
+		},
+		{
 			"name": "[WIP] Delete Current User",
 			"request": {
 				"method": "DELETE",
@@ -497,7 +553,7 @@
 	],
 	"variable": [
 		{
-			"id": "43015b53-f436-4e31-baa3-a6005c783008",
+			"id": "c3d6ca29-3dc2-4a4a-9d93-131204bb3f0f",
 			"key": "baseUrl",
 			"value": "https://user-service.ticket.lepak.sg",
 			"type": "string"
