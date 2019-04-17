@@ -25,4 +25,8 @@ router.delete('/me',
 router.get('/:userIdent/public',
         users.getPublicProfile);
 
+router.get('/:userIdent',
+        login.checkSessionToken,
+        users.getProfile);
+
 module.exports = router;

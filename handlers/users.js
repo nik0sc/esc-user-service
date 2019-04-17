@@ -609,3 +609,60 @@ exports.getPublicProfile = async function (req, res) {
         res.json(row);
     }
 };
+
+/**
+ * 
+ */
+exports.getProfile = async function (req, res) {
+    const user_object_id = req.acn_session.user.objectId;
+    let t_user_ident = req.params.userIdent;
+
+    const knex = req.app.locals.knex;
+    let query = knex('users')
+        .first('id', 'username', 'long_name', 'email', 'phone', 'acn_id',
+            'user_type')
+        .where((builder) => builder
+            .where('acn_id', user_object_id)
+            .orWhere(knex
+                .raw('(select user_type from users where acn_id = ?)', user_object_id)
+            , 2));
+
+    let ident_validation = validation.validateUserIdent(t_user_ident);
+    if (typeof ident_validation === 'string') {
+        if (ident_validation === 'acn_id') {
+            // Remove the 'acn:' prefix
+            t_user_ident = t_user_ident.substring(4);
+        }
+
+        query = query.andWhere(ident_validation, t_user_ident);
+        // ret_object.match = ident_validation;
+    } else {
+        res.status(400).json({
+            error: 'Malformed user identifier'
+        });
+        return;
+    }
+    
+
+    console.log(query.toString());
+
+    let row;
+    try {
+        row = await query;
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            error: 'Db error'
+        });
+        return;
+    }
+
+    if (typeof row === 'undefined') {
+        res.status(404).json({
+            error: 'User not found or you do not have privileges to view this user'
+        });
+        return;
+    }
+    
+    res.json(row);
+};
